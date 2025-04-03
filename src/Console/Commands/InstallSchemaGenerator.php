@@ -54,13 +54,16 @@ class InstallSchemaGenerator extends Command
             File::makeDirectory($pagesDir, 0755, true);
         }
 
-        // Copy resource file - exact copy without namespace changes
+        // Copy resource file - PRESERVE ALL UI COMPONENTS EXACTLY
         $sourceResourceFile = __DIR__ . '/../../Filament/Resources/SchemaGeneratorResource.php';
         $targetResourceFile = app_path('Filament/Resources/SchemaGeneratorResource.php');
 
-        if (!File::exists($targetResourceFile) && File::exists($sourceResourceFile)) {
-            File::copy($sourceResourceFile, $targetResourceFile);
+        // Force copy of the resource file with all UI components
+        if (File::exists($sourceResourceFile)) {
+            File::copy($sourceResourceFile, $targetResourceFile, true);
             $this->info('Published SchemaGeneratorResource to app/Filament/Resources');
+        } else {
+            $this->error('Source SchemaGeneratorResource.php not found! Looking in: ' . $sourceResourceFile);
         }
 
         // Copy page files - exact copies without namespace changes
@@ -70,25 +73,28 @@ class InstallSchemaGenerator extends Command
             foreach (File::files($sourcePagesDir) as $file) {
                 $targetFile = $pagesDir . '/' . $file->getFilename();
 
-                if (!File::exists($targetFile)) {
-                    File::copy($file->getPathname(), $targetFile);
-                }
+                // Force copy all page files
+                File::copy($file->getPathname(), $targetFile, true);
+                $this->info('Published page file: ' . $file->getFilename());
             }
-            $this->info('Published SchemaGeneratorResource page files to app/Filament/Resources/SchemaGeneratorResource/Pages');
+        } else {
+            $this->error('Source Pages directory not found! Looking in: ' . $sourcePagesDir);
         }
 
         // Copy model - exact copy without namespace changes
         $sourceModelFile = __DIR__ . '/../../Models/SchemaGenerator.php';
         $targetModelFile = app_path('Models/SchemaGenerator.php');
 
-        if (!File::exists($targetModelFile) && File::exists($sourceModelFile)) {
-            // Make sure Models directory exists
-            if (!File::isDirectory(app_path('Models'))) {
-                File::makeDirectory(app_path('Models'), 0755, true);
-            }
+        if (!File::isDirectory(app_path('Models'))) {
+            File::makeDirectory(app_path('Models'), 0755, true);
+        }
 
-            File::copy($sourceModelFile, $targetModelFile);
+        // Force copy the model file
+        if (File::exists($sourceModelFile)) {
+            File::copy($sourceModelFile, $targetModelFile, true);
             $this->info('Published SchemaGenerator model to app/Models');
+        } else {
+            $this->error('Source SchemaGenerator.php model not found! Looking in: ' . $sourceModelFile);
         }
     }
 
@@ -162,11 +168,21 @@ class InstallSchemaGenerator extends Command
             ])
 EOT;
 
-                    $content = preg_replace(
-                        '/->maxContentWidth\(\'full\'\)(\s*?)->/m',
-                        "->maxContentWidth('full')\$1$colorsConfig\$1->",
-                        $content
-                    );
+                    // Check if there's already a colors block to replace
+                    if (Str::contains($content, '->colors([')) {
+                        $content = preg_replace(
+                            '/->colors\(\[\s*.*?\s*\]\)/s',
+                            $colorsConfig,
+                            $content
+                        );
+                    } else {
+                        // Otherwise add after maxContentWidth
+                        $content = preg_replace(
+                            '/->maxContentWidth\(\'full\'\)(\s*?)->/m',
+                            "->maxContentWidth('full')\$1$colorsConfig\$1->",
+                            $content
+                        );
+                    }
                 }
 
                 if (File::put($file->getPathname(), $content)) {
