@@ -1,8 +1,8 @@
 <?php
 
-namespace Schema\Filament\Resources\SchemaGeneratorResource\Pages;
+namespace App\Filament\Resources\SchemaGeneratorResource\Pages;
 
-use Schema\Filament\Resources\SchemaGeneratorResource;
+use App\Filament\Resources\SchemaGeneratorResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 

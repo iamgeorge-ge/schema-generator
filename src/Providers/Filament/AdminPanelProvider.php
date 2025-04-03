@@ -26,7 +26,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('schema-generator')
-            ->path('schema')
+            ->path('admin')
             ->login()
             ->maxContentWidth('full')
             ->colors([

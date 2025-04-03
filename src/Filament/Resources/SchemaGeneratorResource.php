@@ -1,10 +1,9 @@
 <?php
 
-namespace Schema\Filament\Resources;
+namespace App\Filament\Resources;
 
-use Schema\Filament\Resources\SchemaGeneratorResource\Pages;
-use Schema\Filament\Resources\SchemaGeneratorResource\RelationManagers;
-use Schema\Models\SchemaGenerator;
+use App\Filament\Resources\SchemaGeneratorResource\Pages;
+use App\Models\SchemaGenerator;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;

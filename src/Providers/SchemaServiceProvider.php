@@ -3,8 +3,6 @@
 namespace Schema\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Schema\Providers\Filament\AdminPanelProvider;
-use Schema\Filament\Resources\SchemaGeneratorResource;
 use Schema\Console\Commands\InstallSchemaGenerator;
 
 class SchemaServiceProvider extends ServiceProvider
@@ -34,19 +32,6 @@ class SchemaServiceProvider extends ServiceProvider
 
         // Load package views
         $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'schema');
-
-        // Register Filament panels and resources
-        if (class_exists('\Filament\Facades\Filament')) {
-            // Register Filament panel
-            $this->app->register(AdminPanelProvider::class);
-
-            // Register Filament resources
-            $this->app->resolving('filament', function () {
-                \Filament\Facades\Filament::registerResources([
-                    SchemaGeneratorResource::class,
-                ]);
-            });
-        }
 
         // Register commands
         if ($this->app->runningInConsole()) {

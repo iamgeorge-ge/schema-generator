@@ -1,8 +1,8 @@
 <?php
 
-namespace Schema\Filament\Resources\SchemaGeneratorResource\Pages;
+namespace App\Filament\Resources\SchemaGeneratorResource\Pages;
 
-use Schema\Filament\Resources\SchemaGeneratorResource;
+use App\Filament\Resources\SchemaGeneratorResource;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -23,10 +23,41 @@ class EditSchemaGenerator extends EditRecord
                 ),
 
             Actions\Action::make('generate')
-                ->label('Generate Code')
+                ->label('Generate Files')
                 ->color('success')
                 ->icon('heroicon-o-code-bracket')
-                ->action(fn($record) => $record->generateCode()),
+                ->action(function () {
+                    // Get the record we're editing
+                    $record = $this->getRecord();
+
+                    try {
+                        // Generate migration
+                        if ($record->generate_migration) {
+                            $migrationPath = $record->generateMigration();
+                            $this->notify('success', 'Migration generated: ' . basename($migrationPath));
+                        }
+
+                        // Generate model code if necessary
+                        if (method_exists($record, 'generateModel') && $record->model_name) {
+                            $modelPath = $record->generateModel();
+                            $this->notify('success', 'Model generated: ' . basename($modelPath));
+                        }
+
+                        // Generate controller if necessary
+                        if (method_exists($record, 'generateController') && $record->generate_controller) {
+                            $controllerPath = $record->generateController();
+                            $this->notify('success', 'Controller generated: ' . basename($controllerPath));
+                        }
+
+                        // Generate API resource if necessary
+                        if (method_exists($record, 'generateApiResource') && $record->generate_api) {
+                            $apiResourcePath = $record->generateApiResource();
+                            $this->notify('success', 'API Resource generated: ' . basename($apiResourcePath));
+                        }
+                    } catch (\Exception $e) {
+                        $this->notify('danger', 'Error generating files: ' . $e->getMessage());
+                    }
+                }),
 
             Actions\Action::make('generate_model')
                 ->label('Generate Model')

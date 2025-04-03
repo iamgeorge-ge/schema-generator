@@ -10,7 +10,7 @@ return [
     | This is used by the package to ensure the correct routes are registered.
     |
     */
-    'path' => 'schema',
+    'path' => 'admin',
 
     /*
     |--------------------------------------------------------------------------
@@ -51,6 +51,9 @@ return [
 
     // Path where models will be created
     'model_path' => app_path('Models'),
+
+    // Path for admin panel
+    'path' => 'admin',
 
     // Default model namespace
     'model_namespace' => 'App\\Models',
