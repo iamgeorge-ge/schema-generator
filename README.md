@@ -68,11 +68,7 @@ The generated code is automatically placed in your application's appropriate dir
 - Migrations in `database/migrations/`
 - Models in `app/Models/` (configurable)
 
-### Screenshots
-
-[//]: # "Add some screenshots here when available"
-
-### Screenshots
+### Screenshot
 
 ![Schema Generator Panel](screenshots/screenshot.jpg)
 
