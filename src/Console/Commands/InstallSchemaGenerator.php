@@ -24,8 +24,8 @@ class InstallSchemaGenerator extends Command
         // Copy Filament resources to app directory
         $this->publishFilamentResources();
 
-        // Ensure Filament panel has registration method
-        $this->ensureFilamentPanelHasRegistration();
+        // Add registration method to ALL panel providers
+        $this->addRegistrationToAllPanels();
 
         // Run migrations
         $this->call('migrate');
@@ -89,53 +89,52 @@ class InstallSchemaGenerator extends Command
     }
 
     /**
-     * Ensure Filament panel provider has registration method
+     * Force add registration method to ALL panel providers in the application
      */
-    protected function ensureFilamentPanelHasRegistration(): void
+    protected function addRegistrationToAllPanels(): void
     {
-        // Look for app providers that might be Filament panel providers
         $providerPaths = [
+            // Look for panel providers in app/Providers
+            app_path('Providers'),
+            // Look for panel providers in app/Providers/Filament
             app_path('Providers/Filament'),
-            app_path('Providers')
         ];
 
-        $found = false;
+        $phpFiles = [];
 
-        foreach ($providerPaths as $providerPath) {
-            if (!File::isDirectory($providerPath)) {
-                continue;
-            }
-
-            // Look for panel provider files
-            $files = File::files($providerPath);
-            foreach ($files as $file) {
-                if (Str::contains($file->getFilename(), 'PanelProvider') || Str::contains($file->getFilename(), 'AdminPanelProvider')) {
-                    $content = File::get($file->getPathname());
-
-                    // Check if registration is already there
-                    if (Str::contains($content, '->registration()')) {
-                        $this->info('Filament panel already has registration enabled in ' . $file->getFilename());
-                        $found = true;
-                        continue;
-                    }
-
-                    // Add registration method
-                    $content = preg_replace(
-                        '/->login\(\)(.*?)->/m',
-                        "->login()\$1->registration()\$1->",
-                        $content
-                    );
-
-                    if (File::put($file->getPathname(), $content)) {
-                        $this->info('Added registration to Filament panel provider: ' . $file->getFilename());
-                        $found = true;
-                    }
-                }
+        // Collect all PHP files in provider directories
+        foreach ($providerPaths as $path) {
+            if (File::isDirectory($path)) {
+                $phpFiles = array_merge($phpFiles, File::files($path));
             }
         }
 
-        if (!$found) {
-            $this->warn('Could not find a Filament panel provider. Please ensure your Filament admin panel has registration enabled manually.');
+        foreach ($phpFiles as $file) {
+            if (!Str::endsWith($file->getFilename(), '.php')) {
+                continue;
+            }
+
+            $content = File::get($file->getPathname());
+
+            // Does this look like a panel provider?
+            if (Str::contains($content, 'PanelProvider') && Str::contains($content, 'panel(') && Str::contains($content, '->login()')) {
+                // Check if registration is already there
+                if (Str::contains($content, '->registration()')) {
+                    continue;
+                }
+
+                // Add registration after login
+                $newContent = preg_replace(
+                    '/->login\(\)(\s*?)->/m',
+                    "->login()\$1->registration()\$1->",
+                    $content
+                );
+
+                if ($newContent !== $content) {
+                    File::put($file->getPathname(), $newContent);
+                    $this->info('Added registration to panel provider: ' . $file->getFilename());
+                }
+            }
         }
     }
 }
