@@ -27,7 +27,7 @@ class InstallSchemaGenerator extends Command
         $this->call('migrate');
 
         $this->info('Schema Generator installed successfully.');
-        $this->info('You can now access the Schema Generator in your Filament admin panel at /' . config('schema.path', 'admin'));
+        $this->info('You can now access the Schema Generator in your Filament admin panel at /admin');
 
         return Command::SUCCESS;
     }
@@ -46,7 +46,7 @@ class InstallSchemaGenerator extends Command
             File::makeDirectory($pagesDir, 0755, true);
         }
 
-        // Copy resource file
+        // Copy resource file - exact copy without namespace changes
         $sourceResourceFile = __DIR__ . '/../../Filament/Resources/SchemaGeneratorResource.php';
         $targetResourceFile = app_path('Filament/Resources/SchemaGeneratorResource.php');
 
@@ -55,7 +55,7 @@ class InstallSchemaGenerator extends Command
             $this->info('Published SchemaGeneratorResource to app/Filament/Resources');
         }
 
-        // Copy page files
+        // Copy page files - exact copies without namespace changes
         $sourcePagesDir = __DIR__ . '/../../Filament/Resources/SchemaGeneratorResource/Pages';
 
         if (File::isDirectory($sourcePagesDir)) {
@@ -69,7 +69,7 @@ class InstallSchemaGenerator extends Command
             $this->info('Published SchemaGeneratorResource page files to app/Filament/Resources/SchemaGeneratorResource/Pages');
         }
 
-        // Copy model
+        // Copy model - exact copy without namespace changes
         $sourceModelFile = __DIR__ . '/../../Models/SchemaGenerator.php';
         $targetModelFile = app_path('Models/SchemaGenerator.php');
 

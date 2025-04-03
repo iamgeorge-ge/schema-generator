@@ -22,43 +22,27 @@ class EditSchemaGenerator extends EditRecord
                         ->body('The schema and its migration file have been deleted.')
                 ),
 
-            Actions\Action::make('generate')
-                ->label('Generate Files')
-                ->color('success')
+            Actions\Action::make('generate_migration')
+                ->label('Generate Migration')
                 ->icon('heroicon-o-code-bracket')
-                ->action(function () {
-                    // Get the record we're editing
-                    $record = $this->getRecord();
-
+                ->color('success')
+                ->requiresConfirmation()
+                ->action(function (): void {
                     try {
-                        // Generate migration
-                        if ($record->generate_migration) {
-                            $migrationPath = $record->generateMigration();
-                            $this->notify('success', 'Migration generated: ' . basename($migrationPath));
-                        }
-
-                        // Generate model code if necessary
-                        if (method_exists($record, 'generateModel') && $record->model_name) {
-                            $modelPath = $record->generateModel();
-                            $this->notify('success', 'Model generated: ' . basename($modelPath));
-                        }
-
-                        // Generate controller if necessary
-                        if (method_exists($record, 'generateController') && $record->generate_controller) {
-                            $controllerPath = $record->generateController();
-                            $this->notify('success', 'Controller generated: ' . basename($controllerPath));
-                        }
-
-                        // Generate API resource if necessary
-                        if (method_exists($record, 'generateApiResource') && $record->generate_api) {
-                            $apiResourcePath = $record->generateApiResource();
-                            $this->notify('success', 'API Resource generated: ' . basename($apiResourcePath));
-                        }
+                        $migrationPath = $this->record->generateMigration();
+                        Notification::make()
+                            ->title('Migration generated successfully!')
+                            ->body("Migration file created at {$migrationPath}")
+                            ->success()
+                            ->send();
                     } catch (\Exception $e) {
-                        $this->notify('danger', 'Error generating files: ' . $e->getMessage());
+                        Notification::make()
+                            ->title('Error generating migration')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
                     }
                 }),
-
             Actions\Action::make('generate_model')
                 ->label('Generate Model')
                 ->icon('heroicon-o-code-bracket')

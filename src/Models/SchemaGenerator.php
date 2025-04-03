@@ -12,8 +12,6 @@ class SchemaGenerator extends Model
 {
     use HasFactory;
 
-    protected $table = 'schemas';
-
     protected $fillable = [
         'table_name',
         'schema_definition',
@@ -35,12 +33,6 @@ class SchemaGenerator extends Model
         'fillable_fields',
         'field_selection',
         'model_relationships',
-        'generate_migration',
-        'generate_factory',
-        'generate_seeder',
-        'generate_controller',
-        'generate_api',
-        'generate_filament_resource',
     ];
 
     protected $casts = [
@@ -49,12 +41,6 @@ class SchemaGenerator extends Model
         'fillable_fields' => 'array',
         'field_selection' => 'array',
         'model_relationships' => 'array',
-        'generate_migration' => 'boolean',
-        'generate_factory' => 'boolean',
-        'generate_seeder' => 'boolean',
-        'generate_controller' => 'boolean',
-        'generate_api' => 'boolean',
-        'generate_filament_resource' => 'boolean',
     ];
 
     /**
@@ -702,23 +688,5 @@ class SchemaGenerator extends Model
         }
 
         return $modelCode;
-    }
-
-    /**
-     * Generate controller from the schema
-     */
-    public function generateController()
-    {
-        // This would be implemented in a real app
-        return $this->model_name . 'Controller';
-    }
-
-    /**
-     * Generate API resource from the schema
-     */
-    public function generateApiResource()
-    {
-        // This would be implemented in a real app
-        return $this->model_name . 'Resource';
     }
 }
