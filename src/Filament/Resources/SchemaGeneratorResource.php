@@ -38,6 +38,29 @@ class SchemaGeneratorResource extends Resource
                 Forms\Components\Textarea::make('description')
                     ->maxLength(65535)
                     ->columnSpanFull(),
+                Forms\Components\Section::make('Generation Options')
+                    ->schema([
+                        Forms\Components\Toggle::make('generate_migration')
+                            ->label('Generate Migration')
+                            ->default(true),
+                        Forms\Components\Toggle::make('generate_factory')
+                            ->label('Generate Factory')
+                            ->default(true),
+                        Forms\Components\Toggle::make('generate_seeder')
+                            ->label('Generate Seeder')
+                            ->default(false),
+                        Forms\Components\Toggle::make('generate_controller')
+                            ->label('Generate Controller')
+                            ->default(true),
+                        Forms\Components\Toggle::make('generate_api')
+                            ->label('Generate API Resource')
+                            ->default(true),
+                        Forms\Components\Toggle::make('generate_filament_resource')
+                            ->label('Generate Filament Resource')
+                            ->default(true),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull(),
             ]);
     }
 

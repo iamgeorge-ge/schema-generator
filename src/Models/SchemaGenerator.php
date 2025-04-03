@@ -16,10 +16,22 @@ class SchemaGenerator extends Model
         'model_name',
         'description',
         'schema_definition',
+        'generate_migration',
+        'generate_factory',
+        'generate_seeder',
+        'generate_controller',
+        'generate_api',
+        'generate_filament_resource',
     ];
 
     protected $casts = [
         'schema_definition' => 'array',
+        'generate_migration' => 'boolean',
+        'generate_factory' => 'boolean',
+        'generate_seeder' => 'boolean',
+        'generate_controller' => 'boolean',
+        'generate_api' => 'boolean',
+        'generate_filament_resource' => 'boolean',
     ];
 
     /**
