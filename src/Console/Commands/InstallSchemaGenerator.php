@@ -4,6 +4,7 @@ namespace Schema\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class InstallSchemaGenerator extends Command
 {
@@ -22,6 +23,9 @@ class InstallSchemaGenerator extends Command
 
         // Copy Filament resources to app directory
         $this->publishFilamentResources();
+
+        // Ensure Filament panel has registration method
+        $this->ensureFilamentPanelHasRegistration();
 
         // Run migrations
         $this->call('migrate');
@@ -81,6 +85,57 @@ class InstallSchemaGenerator extends Command
 
             File::copy($sourceModelFile, $targetModelFile);
             $this->info('Published SchemaGenerator model to app/Models');
+        }
+    }
+
+    /**
+     * Ensure Filament panel provider has registration method
+     */
+    protected function ensureFilamentPanelHasRegistration(): void
+    {
+        // Look for app providers that might be Filament panel providers
+        $providerPaths = [
+            app_path('Providers/Filament'),
+            app_path('Providers')
+        ];
+
+        $found = false;
+
+        foreach ($providerPaths as $providerPath) {
+            if (!File::isDirectory($providerPath)) {
+                continue;
+            }
+
+            // Look for panel provider files
+            $files = File::files($providerPath);
+            foreach ($files as $file) {
+                if (Str::contains($file->getFilename(), 'PanelProvider') || Str::contains($file->getFilename(), 'AdminPanelProvider')) {
+                    $content = File::get($file->getPathname());
+
+                    // Check if registration is already there
+                    if (Str::contains($content, '->registration()')) {
+                        $this->info('Filament panel already has registration enabled in ' . $file->getFilename());
+                        $found = true;
+                        continue;
+                    }
+
+                    // Add registration method
+                    $content = preg_replace(
+                        '/->login\(\)(.*?)->/m',
+                        "->login()\$1->registration()\$1->",
+                        $content
+                    );
+
+                    if (File::put($file->getPathname(), $content)) {
+                        $this->info('Added registration to Filament panel provider: ' . $file->getFilename());
+                        $found = true;
+                    }
+                }
+            }
+        }
+
+        if (!$found) {
+            $this->warn('Could not find a Filament panel provider. Please ensure your Filament admin panel has registration enabled manually.');
         }
     }
 }
