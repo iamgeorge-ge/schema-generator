@@ -15,9 +15,9 @@ A powerful Laravel package that provides a full-featured schema management syste
 
 ## Requirements
 
-- PHP 8.1 or higher
-- Laravel 10.0 or higher
-- Filament 3.0 or higher
+- PHP 8.2 or higher
+- Laravel 11.0 or higher
+- Filament 3.2 or higher
 
 ## Installation
 
@@ -131,7 +131,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
-- [George](https://github.com/iamgeorge-ge)
+- [George](https://github.com/iamgeorge-ge) - [http://iamgeor.ge](http://iamgeor.ge)
 - [All Contributors](../../contributors)
 
 ## License
