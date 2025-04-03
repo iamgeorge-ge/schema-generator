@@ -5,6 +5,7 @@ namespace Schema\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 class InstallSchemaGenerator extends Command
 {
@@ -26,6 +27,9 @@ class InstallSchemaGenerator extends Command
 
         // Add registration method to ALL panel providers
         $this->addRegistrationToAllPanels();
+
+        // Create migration for missing columns
+        $this->fixMissingDatabaseColumns();
 
         // Run migrations
         $this->call('migrate');
@@ -136,5 +140,114 @@ class InstallSchemaGenerator extends Command
                 }
             }
         }
+    }
+
+    /**
+     * Fix missing database columns
+     */
+    protected function fixMissingDatabaseColumns(): void
+    {
+        // Check if schemas table exists
+        if (!Schema::hasTable('schemas')) {
+            return;
+        }
+
+        // Check and add missing columns
+        $missingColumns = [];
+        $columns = [
+            'migration_path' => 'string',
+            'model_path' => 'string',
+            'collection_name' => 'string',
+            'namespace' => 'string',
+            'model_options' => 'json',
+            'model_code' => 'text',
+            'factory' => 'boolean',
+            'policy' => 'boolean',
+            'seeder' => 'boolean',
+            'controller' => 'boolean',
+            'has_timestamps' => 'boolean',
+            'has_fillable' => 'boolean',
+            'has_guarded' => 'boolean',
+            'has_soft_deletes' => 'boolean',
+            'fillable_fields' => 'json',
+            'field_selection' => 'json',
+            'model_relationships' => 'json',
+        ];
+
+        // Create dynamic migration content
+        foreach ($columns as $column => $type) {
+            if (!Schema::hasColumn('schemas', $column)) {
+                $missingColumns[$column] = $type;
+            }
+        }
+
+        if (empty($missingColumns)) {
+            $this->info('No missing columns in schemas table.');
+            return;
+        }
+
+        // Create a dynamic migration to add missing columns
+        $migrationPath = database_path('migrations/' . date('Y_m_d_His') . '_add_missing_columns_to_schemas.php');
+
+        $migrationContent = <<<EOT
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('schemas', function (Blueprint \$table) {
+
+EOT;
+
+        foreach ($missingColumns as $column => $type) {
+            switch ($type) {
+                case 'string':
+                    $migrationContent .= "            \$table->string('$column')->nullable();\n";
+                    break;
+                case 'text':
+                    $migrationContent .= "            \$table->text('$column')->nullable();\n";
+                    break;
+                case 'json':
+                    $migrationContent .= "            \$table->json('$column')->nullable();\n";
+                    break;
+                case 'boolean':
+                    $default = in_array($column, ['has_timestamps', 'has_fillable']) ? 'true' : 'false';
+                    $migrationContent .= "            \$table->boolean('$column')->default($default);\n";
+                    break;
+            }
+        }
+
+        $migrationContent .= <<<EOT
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('schemas', function (Blueprint \$table) {
+EOT;
+
+        foreach ($missingColumns as $column => $type) {
+            $migrationContent .= "            \$table->dropColumn('$column');\n";
+        }
+
+        $migrationContent .= <<<EOT
+        });
+    }
+};
+EOT;
+
+        File::put($migrationPath, $migrationContent);
+        $this->info('Created migration to add missing columns to schemas table.');
     }
 }
