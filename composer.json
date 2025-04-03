@@ -1,0 +1,34 @@
+{
+    "name": "iamgeor.ge/schema-generator",
+    "description": "A Laravel package for generating database schemas, models, and migrations through a Filament admin panel",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "George",
+            "email": "info@iamgeor.ge"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^10.0",
+        "filament/filament": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Schema\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Schema\\Providers\\SchemaServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
