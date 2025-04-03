@@ -12,6 +12,8 @@ class SchemaGenerator extends Model
 {
     use HasFactory;
 
+    protected $table = 'schemas';
+
     protected $fillable = [
         'table_name',
         'schema_definition',
