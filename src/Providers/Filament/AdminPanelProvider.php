@@ -17,7 +17,6 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Schema\Filament\Resources\SchemaGeneratorResource;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -28,6 +27,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('schema-generator')
             ->path('admin')
             ->login()
+            ->registration()
             ->maxContentWidth('full')
             ->colors([
                 'danger' => Color::Rose,
@@ -39,10 +39,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             // Register app resources
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
-            // Register package resources
-            ->resources([
-                SchemaGeneratorResource::class,
-            ])
             ->pages([
                 Pages\Dashboard::class,
             ])
