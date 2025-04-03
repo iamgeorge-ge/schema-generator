@@ -123,20 +123,54 @@ class InstallSchemaGenerator extends Command
             // Does this look like a panel provider?
             if (Str::contains($content, 'PanelProvider') && Str::contains($content, 'panel(') && Str::contains($content, '->login()')) {
                 // Check if registration is already there
-                if (Str::contains($content, '->registration()')) {
+                if (
+                    Str::contains($content, '->registration()') &&
+                    Str::contains($content, '->maxContentWidth(\'full\')') &&
+                    Str::contains($content, 'danger => Color::Rose')
+                ) {
                     continue;
                 }
 
-                // Add registration after login
-                $newContent = preg_replace(
-                    '/->login\(\)(\s*?)->/m',
-                    "->login()\$1->registration()\$1->",
-                    $content
-                );
+                // Add configuration after login
+                if (!Str::contains($content, '->registration()')) {
+                    $content = preg_replace(
+                        '/->login\(\)(\s*?)->/m',
+                        "->login()\$1->registration()\$1->",
+                        $content
+                    );
+                }
 
-                if ($newContent !== $content) {
-                    File::put($file->getPathname(), $newContent);
-                    $this->info('Added registration to panel provider: ' . $file->getFilename());
+                // Add maxContentWidth if missing
+                if (!Str::contains($content, '->maxContentWidth(\'full\')')) {
+                    $content = preg_replace(
+                        '/->registration\(\)(\s*?)->/m',
+                        "->registration()\$1->maxContentWidth('full')\$1->",
+                        $content
+                    );
+                }
+
+                // Add colors configuration if missing
+                if (!Str::contains($content, 'danger => Color::Rose')) {
+                    $colorsConfig = <<<EOT
+->colors([
+                'danger' => Color::Rose,
+                'gray' => Color::Gray,
+                'info' => Color::Blue,
+                'primary' => Color::Indigo,
+                'success' => Color::Emerald,
+                'warning' => Color::Orange,
+            ])
+EOT;
+
+                    $content = preg_replace(
+                        '/->maxContentWidth\(\'full\'\)(\s*?)->/m',
+                        "->maxContentWidth('full')\$1$colorsConfig\$1->",
+                        $content
+                    );
+                }
+
+                if (File::put($file->getPathname(), $content)) {
+                    $this->info('Updated panel provider configuration: ' . $file->getFilename());
                 }
             }
         }
