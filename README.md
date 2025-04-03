@@ -72,6 +72,12 @@ The generated code is automatically placed in your application's appropriate dir
 
 [//]: # "Add some screenshots here when available"
 
+### Screenshots
+
+![Schema Generator Panel](screenshots/screenshot.jpg)
+
+_The Schema Generator interface showing the full-featured UI with all tabs and components._
+
 ## Features
 
 - **Filament Admin Panel Integration**: Built directly on Filament 3.x for a polished admin experience
